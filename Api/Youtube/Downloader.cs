@@ -9,13 +9,16 @@ namespace Api.Youtube
 
         private readonly VideoClient downloader = new VideoClient(new());
 
-        public async Task<System.String> GetAudioStreamUrlAsync(VideoId videoId)
+#nullable enable
+        public async Task<string?> GetAudioStreamUrlAsync(VideoId videoId)
+#nullable disable
         {
-            YoutubeExplode.Videos.Streams.AudioOnlyStreamInfo bestQualityStream = (await downloader.Streams.GetManifestAsync(videoId)).GetAudioOnlyStreams()
+            var bestQualityStream = (await downloader.Streams.GetManifestAsync(videoId)).GetAudioOnlyStreams()
                                                                                         .Where(si => si.Container.Name == "webm")
                                                                                         .OrderBy(si => si.Bitrate)
-                                                                                        .First();
-            return bestQualityStream.Url;
+                                                                                        .FirstOrDefault();
+
+            return bestQualityStream?.Url;
         }
 
     }

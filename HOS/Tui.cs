@@ -39,15 +39,15 @@ namespace Client
 
         #endregion
 
-        private static readonly String[] CATEGORIES = new String[] { "Albums", "Channels" };
+        private static readonly string[] CATEGORIES = new string[] { "Albums", "Channels" };
 
         /* - CACHED CATEGORIES - */
         private readonly AsyncLazy<DataTable> ALBUM_TABLE = new AsyncLazy<DataTable>(() => Task.Run(async () =>
         {
-            DataTable table = TableBase.AlbumTableBase;
-            Album[] albums = await CachedHOSApi.GetAlbumsAsync();
+            var table = TableBase.AlbumTableBase;
+            var albums = await CachedHOSApi.GetAlbumsAsync();
 
-            foreach (Album album in albums)
+            foreach (var album in albums)
             {
                 table.Rows.Add(album.id, album.title, album.attribution, album.duration);
             }
@@ -56,10 +56,10 @@ namespace Client
         }));
         private readonly AsyncLazy<DataTable> CHANNEL_TABLE = new AsyncLazy<DataTable>(() => Task.Run(async () =>
         {
-            DataTable table = TableBase.ChannelTableBase;
-            Channel[] channels = await CachedHOSApi.GetChannelsAsync();
+            var table = TableBase.ChannelTableBase;
+            var channels = await CachedHOSApi.GetChannelsAsync();
 
-            foreach (Channel channel in channels)
+            foreach (var channel in channels)
             {
                 table.Rows.Add(channel.id, channel.name, channel.description);
             }
@@ -107,8 +107,8 @@ namespace Client
             categorySelectionView.SelectedItemChanged += CategorySelectionView_SelectedItemChanged;
 
             // main window
-            Window window = new Window("hearts of space");
-            MenuBarItem[] keyBinds = new MenuBarItem[]
+            var window = new Window("hearts of space");
+            var keyBinds = new MenuBarItem[]
             {
                 new MenuBarItem("Keybinds", new MenuItem[]
                 {
@@ -162,7 +162,7 @@ namespace Client
                 }
             );
 
-            Color[] colors = new Color[] { Color.White, Color.BrightBlue, Color.BrightCyan, Color.Gray };
+            var colors = new Color[] { Color.White, Color.BrightBlue, Color.BrightCyan, Color.Gray };
 
             Application.MainLoop.AddTimeout(
                 TimeSpan.FromSeconds(10),
@@ -170,7 +170,7 @@ namespace Client
                 {
                     Task.Run(async () =>
                     {
-                        foreach (Color color in colors)
+                        foreach (var color in colors)
                         {
                             phraseLabel.ColorScheme = new ColorScheme()
                             {
@@ -194,7 +194,7 @@ namespace Client
         {
             int y = obj.NewRow;
             int columnCount = obj.Table.Columns.Count;
-            TableView.TableSelection multiselectParameters = new TableView.TableSelection(new Point(0, y), new Rect(0, y, columnCount, 1));
+            var multiselectParameters = new TableView.TableSelection(new Point(0, y), new Rect(0, y, columnCount, 1));
 
             mainTableView.MultiSelectedRegions.Push(multiselectParameters);
         }
@@ -203,8 +203,8 @@ namespace Client
         {
             await (obj.Item switch
             {
-                (int)Category.Albums => DisplayAlbums(),
-                (int)Category.Channels => DisplayChannels(),
+                (int) Category.Albums => DisplayAlbums(),
+                (int) Category.Channels => DisplayChannels(),
                 _ => Task.CompletedTask,
             });
         }
@@ -215,8 +215,8 @@ namespace Client
                 return;
             }
 
-            DataRow row = mainTableView.Table.Rows[selectedRow];
-            int keyCode = (int)obj.KeyEvent.Key;
+            var row = mainTableView.Table.Rows[selectedRow];
+            int keyCode = (int) obj.KeyEvent.Key;
 
             await (keyCode switch
             {
@@ -235,7 +235,7 @@ namespace Client
         #region OPS HANDLERS
         private async Task HandleMore(DataRow row)
         {
-            Int32 id = row.Field<Int32>(0);
+            int id = row.Field<int>(0);
             await (CurrentStep switch
             {
                 Step.ConsultingAlbums => DisplayAlbumTracks(id),
@@ -247,15 +247,15 @@ namespace Client
         private async Task HandlePlay(DataRow row)
         {
             // should be safe, all tables start with an id column
-            Int32 id = row.Field<Int32>("id");
-            Track[] tracks = await GetTracksAsync(id);
+            int id = row.Field<int>("id");
+            var tracks = await GetTracksAsync(id);
 
             if (tracks is null)
             {
                 return;
             }
 
-            Track toPlay = tracks[0];
+            var toPlay = tracks[0];
 
             await audioPlayer.PlayTrackWithVisualFeedbackAsync(toPlay);
 
@@ -266,8 +266,8 @@ namespace Client
         }
         private async Task HandleQueue(DataRow row)
         {
-            Int32 id = row.Field<Int32>("id");
-            Track[] tracks = await GetTracksAsync(id);
+            int id = row.Field<int>("id");
+            var tracks = await GetTracksAsync(id);
 
             if (tracks is null)
             {
@@ -283,9 +283,9 @@ namespace Client
                 return;
             }
 
-            (StepData _, StepData last) = (stepHistory.Pop(), stepHistory.Pop());
+            (var _, var last) = (stepHistory.Pop(), stepHistory.Pop());
 
-            (Step lastStep, Int32 id) = last;
+            (var lastStep, int id) = last;
             await (lastStep switch
             {
                 Step.ConsultingAlbums => DisplayAlbums(),
@@ -310,21 +310,21 @@ namespace Client
         private async Task DisplayAlbums()
         {
             SetCurrentStepData(Step.ConsultingAlbums);
-            DataTable albums = await ALBUM_TABLE.GetAsync()
+            var albums = await ALBUM_TABLE.GetAsync()
                                           .WithUITask("getting albums");
             mainTableView.Table = albums;
         }
         private async Task DisplayAlbumTracks(int albumId)
         {
             SetCurrentStepData(Step.ConsultingAlbumTracks, albumId);
-            Track[] albumTracks = await CachedHOSApi.GetAlbumTracksAsync(albumId)
+            var albumTracks = await CachedHOSApi.GetAlbumTracksAsync(albumId)
                                           .WithUITask("getting tracks");
             mainTableView.Table = albumTracks.ToDataTable();
         }
         private async Task DisplayChannels()
         {
             SetCurrentStepData(Step.ConsultingChannels);
-            DataTable channels = await CHANNEL_TABLE.GetAsync()
+            var channels = await CHANNEL_TABLE.GetAsync()
                                               .WithUITask("getting channels");
             mainTableView.Table = channels;
         }
@@ -336,7 +336,7 @@ namespace Client
         private async Task DisplayChannelProgramTracks(int programId)
         {
             SetCurrentStepData(Step.ConsultingChannelProgramTracks, programId);
-            ProgramAlbum[] programTracks = await CachedHOSApi.GetProgramTracksAsync(programId)
+            var programTracks = await CachedHOSApi.GetProgramTracksAsync(programId)
                                             .WithUITask("getting tracks");
             mainTableView.Table = programTracks.ToDataTable();
         }

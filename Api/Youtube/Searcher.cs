@@ -14,17 +14,17 @@ namespace Api.Youtube
 
         public async Task<VideoSearchResult> SearchSongAsync(Track track)
         {
-            String query = track.title + ' ' + track.artists.First().name;
+            string query = track.title + ' ' + track.artists.First().name;
             return await SearchSongAsync(query, track.duration);
         }
-        public async Task<VideoSearchResult> SearchSongAsync(String query, int duration)
+        public async Task<VideoSearchResult> SearchSongAsync(string query, int duration)
         {
-            IOrderedEnumerable<VideoSearchResult> videos = (await client.GetVideosAsync(query)
+            var videos = (await client.GetVideosAsync(query)
                                      .CollectAsync(6))
                                      .OrderBy(v =>
                                      {
-                                         TimeSpan d = v.Duration ?? TimeSpan.MaxValue;
-                                         return Math.Abs((int)d.TotalSeconds - duration);
+                                         var d = v.Duration ?? TimeSpan.MaxValue;
+                                         return Math.Abs((int) d.TotalSeconds - duration);
                                      });
 
             if (!videos.Any())

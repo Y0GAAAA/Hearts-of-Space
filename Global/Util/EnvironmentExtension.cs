@@ -5,7 +5,7 @@ namespace Global.Util
     public static class EnvironmentExtension
     {
 
-        public static String ThrowingGetEnvironmentVariable(String key, String friendlyName)
+        public static string ThrowingGetEnvironmentVariable(string key, string friendlyName)
         {
             return Environment.GetEnvironmentVariable(
                 key,

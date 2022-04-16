@@ -1,5 +1,4 @@
 ﻿using Global.Util;
-using System;
 
 namespace Api.HOS.Json
 {
@@ -10,7 +9,7 @@ namespace Api.HOS.Json
     public class Track
     {
         public int id { get; set; }
-        public String title { get; set; }
+        public string title { get; set; }
         public Artist[] artists { get; set; }
         public int duration { get; set; }
 
@@ -21,6 +20,6 @@ namespace Api.HOS.Json
     }
     public class Artist
     {
-        public String name { get; set; }
+        public string name { get; set; }
     }
 }

@@ -8,11 +8,11 @@ namespace Api.HOS.Json
     {
         public static DataTable ToDataTable(this ProgramAlbum[] albums)
         {
-            DataTable table = TableBase.ChannelProgramTrackTableBase;
+            var table = TableBase.ChannelProgramTrackTableBase;
 
-            foreach (ProgramAlbum album in albums)
+            foreach (var album in albums)
             {
-                foreach (Track track in album.tracks)
+                foreach (var track in album.tracks)
                     table.Rows.Add(track.id, track.title, album.title, track.artists.First().name, track.duration);
             }
 
@@ -20,19 +20,19 @@ namespace Api.HOS.Json
         }
         public static DataTable ToDataTable(this Track[] tracks)
         {
-            DataTable table = TableBase.AlbumTrackTableBase;
-            foreach (Track track in tracks)
+            var table = TableBase.AlbumTrackTableBase;
+            foreach (var track in tracks)
             {
-                System.String artists = string.Join(", ", track.artists.Select(artist => artist.name));
+                string artists = string.Join(", ", track.artists.Select(artist => artist.name));
                 table.Rows.Add(track.id, track.title, artists, track.duration);
             }
             return table;
         }
         public static DataTable ToDataTable(this ChannelProgram[] programs)
         {
-            DataTable table = TableBase.ChannelProgramTableBase;
+            var table = TableBase.ChannelProgramTableBase;
 
-            foreach (ChannelProgram program in programs)
+            foreach (var program in programs)
                 table.Rows.Add(program.id, program.title, program.shortDescription);
 
             return table;

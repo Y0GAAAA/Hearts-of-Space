@@ -1,6 +1,5 @@
 ﻿using Api.HOS.Json;
 using Global.Util;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -34,7 +33,7 @@ namespace Api.HOS
             return (await HOSApi.GetChannelsAsync()).Select(channel =>
             {
                 channelPrograms.TryAdd(channel.id, channel.programs);
-                foreach (ChannelProgram program in channel.programs)
+                foreach (var program in channel.programs)
                 {
                     programTracks.TryAdd(program.id, new AsyncLazy<ProgramAlbum[]>(() => Task.Run(async () =>
                     {

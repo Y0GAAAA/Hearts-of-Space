@@ -10,7 +10,7 @@ namespace Global.Util
         {
             while (true)
             {
-                foreach (T item in enumerable)
+                foreach (var item in enumerable)
                     yield return item;
             }
         }

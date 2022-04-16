@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Api.HOS.Json
+﻿namespace Api.HOS.Json
 {
 
     public class AlbumCollection
@@ -12,8 +10,8 @@ namespace Api.HOS.Json
     public class Album
     {
         public int id { get; set; }
-        public String attribution { get; set; }
-        public String title { get; set; }
+        public string attribution { get; set; }
+        public string title { get; set; }
         public int duration { get; set; }
     }
 }

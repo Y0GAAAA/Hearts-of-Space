@@ -11,7 +11,7 @@ namespace Global.Util
 
         private readonly SemaphoreSlim semaphore = new SemaphoreSlim(1);
 
-        public Boolean ValueCreated { get; private set; } = false;
+        public bool ValueCreated { get; private set; } = false;
 
         public AsyncLazy(Func<Task<T>> f)
         {

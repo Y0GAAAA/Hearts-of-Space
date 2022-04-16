@@ -13,13 +13,13 @@ namespace Client
         public static readonly List<TaskData> tasks = new List<TaskData>();
         private static readonly object TASK_MANIPULATE_LOCK = new object();
 
-        private const int MAX_TASK_COUNT = Byte.MaxValue;
+        private const int MAX_TASK_COUNT = byte.MaxValue;
         private const string UNKNOWN_TASK_TITLE = "<phantom task>";
 
         #region MUST be used in sync-lock
         private static int GetAvailableTaskId()
         {
-            IEnumerable<int>? taskIds = tasks.Select(t => t.Id);
+            var taskIds = tasks.Select(t => t.Id);
             return Enumerable.Range(1, MAX_TASK_COUNT)
                              .First(id => !taskIds.Contains(id));
         }
@@ -55,7 +55,7 @@ namespace Client
                 );
             }
 
-            T value = await t;
+            var value = await t;
 
             lock (TASK_MANIPULATE_LOCK) { RemoveTaskById(id); }
 

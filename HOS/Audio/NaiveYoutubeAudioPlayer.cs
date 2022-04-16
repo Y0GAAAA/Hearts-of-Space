@@ -35,16 +35,16 @@ namespace Client.Audio
             };
         }
 
-        public String TimeStatus
+        public string TimeStatus
         {
             get
             {
-                String toMMSS(Int64 ms)
+                string toMMSS(long ms)
                 {
                     return TimeSpan.FromMilliseconds(ms)
                                    .ToString("mm\\:ss");
                 }
-                (Int64 length, Int64 time) = (player.Length, player.Time);
+                (long length, long time) = (player.Length, player.Time);
 
                 if (length == -1 || time == -1)
                 {
@@ -58,9 +58,9 @@ namespace Client.Audio
                 );
             }
         }
-        public String PlayingStatus => player.IsPlaying ? "playing" : "paused";
-        public Boolean HasMedia => player.Media is not null;
-        public Boolean MediaEndReached { get; private set; } = true;
+        public string PlayingStatus => player.IsPlaying ? "playing" : "paused";
+        public bool HasMedia => player.Media is not null;
+        public bool MediaEndReached { get; private set; } = true;
 
         public enum PlayTrackResult
         {
@@ -72,7 +72,7 @@ namespace Client.Audio
 
         public void AddToQueue(Track[] track)
         {
-            foreach (Track t in track)
+            foreach (var t in track)
             {
                 trackQueue.Enqueue(t);
                 Debug.WriteLine($"added track (id {t.id}) to queue; length of queue is {trackQueue.Count}");
@@ -81,7 +81,7 @@ namespace Client.Audio
 
         public async Task<PlayTrackResult> PlayTrackAsync(Track track)
         {
-            YoutubeExplode.Search.VideoSearchResult searchResult = await youtubeSearcher.SearchSongAsync(track)
+            var searchResult = await youtubeSearcher.SearchSongAsync(track)
                                                     .WithUITask("searching");
 
             if (searchResult is null)
@@ -89,11 +89,11 @@ namespace Client.Audio
                 return PlayTrackResult.NoTrackFound;
             }
 
-            String streamUrl = await youtubeDownloader.GetAudioStreamUrlAsync(searchResult.Id)
+            string streamUrl = await youtubeDownloader.GetAudioStreamUrlAsync(searchResult.Id)
                                                    .WithUITask("downloading");
 
-            using Media media = new Media(libVlc, new Uri(streamUrl));
-            MediaParsedStatus parseResult = await media.Parse(MediaParseOptions.ParseNetwork)
+            using var media = new Media(libVlc, new Uri(streamUrl));
+            var parseResult = await media.Parse(MediaParseOptions.ParseNetwork)
                                          .WithUITask("parsing");
 
             if (parseResult is not MediaParsedStatus.Done)
@@ -101,7 +101,7 @@ namespace Client.Audio
                 return PlayTrackResult.NetworkParsingFailed;
             }
 
-            Boolean playing = player.Play(media);
+            bool playing = player.Play(media);
 
             MediaEndReached = !playing;
 
@@ -110,9 +110,9 @@ namespace Client.Audio
 
         public async Task PlayTrackWithVisualFeedbackAsync(Track track)
         {
-            PlayTrackResult result = await PlayTrackAsync(track);
+            var result = await PlayTrackAsync(track);
 
-            String errorString = result switch
+            string errorString = result switch
             {
                 PlayTrackResult.NetworkParsingFailed => "Network parsing failed",
                 PlayTrackResult.NoTrackFound => "No track found",
@@ -126,11 +126,11 @@ namespace Client.Audio
             }
         }
 
-        public async Task<Boolean> PlayNextTrackInQueue()
+        public async Task<bool> PlayNextTrackInQueue()
         {
             if (trackQueue.Count > 0)
             {
-                Track nextTrack = trackQueue.Dequeue();
+                var nextTrack = trackQueue.Dequeue();
                 await PlayTrackWithVisualFeedbackAsync(nextTrack);
                 return true;
             }

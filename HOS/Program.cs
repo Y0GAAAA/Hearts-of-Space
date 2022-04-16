@@ -8,7 +8,7 @@ namespace Client
          * TODO
          * "upper menu" with keybinds
          */
-        private static void Main(String[] args)
+        private static void Main(string[] args)
         {
             Console.Title = string.Empty;
             new Tui().Run();

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Data;
+﻿using System.Data;
 
 namespace Global.Table
 {
@@ -19,37 +18,37 @@ namespace Global.Table
 
         private static DataTable GetAlbumTableBase()
         {
-            return new HandyDataTable().AddColumn<Int32>("id")
-                                       .AddColumn<String>("title")
-                                       .AddColumn<String>("attribution")
-                                       .AddColumn<Int32>("duration");
+            return new HandyDataTable().AddColumn<int>("id")
+                                       .AddColumn<string>("title")
+                                       .AddColumn<string>("attribution")
+                                       .AddColumn<int>("duration");
         }
         private static DataTable GetAlbumTrackTableBase()
         {
-            return new HandyDataTable().AddColumn<Int32>("id")
-                                       .AddColumn<String>("title")
-                                       .AddColumn<String>("artists")
-                                       .AddColumn<Int32>("duration");
+            return new HandyDataTable().AddColumn<int>("id")
+                                       .AddColumn<string>("title")
+                                       .AddColumn<string>("artists")
+                                       .AddColumn<int>("duration");
         }
         private static DataTable GetChannelTableBase()
         {
-            return new HandyDataTable().AddColumn<Int32>("id")
-                                       .AddColumn<String>("name")
-                                       .AddColumn<String>("description");
+            return new HandyDataTable().AddColumn<int>("id")
+                                       .AddColumn<string>("name")
+                                       .AddColumn<string>("description");
         }
         private static DataTable GetChannelProgramTableBase()
         {
-            return new HandyDataTable().AddColumn<Int32>("id")
-                                       .AddColumn<String>("title")
-                                       .AddColumn<String>("description");
+            return new HandyDataTable().AddColumn<int>("id")
+                                       .AddColumn<string>("title")
+                                       .AddColumn<string>("description");
         }
         private static DataTable GetChannelProgramTrackTableBase()
         {
-            return new HandyDataTable().AddColumn<Int32>("id")
-                                       .AddColumn<String>("title")
-                                       .AddColumn<String>("album")
-                                       .AddColumn<String>("artists")
-                                       .AddColumn<Int32>("duration");
+            return new HandyDataTable().AddColumn<int>("id")
+                                       .AddColumn<string>("title")
+                                       .AddColumn<string>("album")
+                                       .AddColumn<string>("artists")
+                                       .AddColumn<int>("duration");
         }
 
     }

@@ -6,7 +6,7 @@
     }
     public class ProgramAlbum
     {
-        public System.String title { get; set; }
+        public string title { get; set; }
         public Track[] tracks { get; set; }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using Api.HOS.Json;
 using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
@@ -21,27 +20,27 @@ namespace Api.HOS
             };
 
             // accessing the deserializer concurrently is most certainly UB
-            private static readonly Object DESERIALIZE_LOCK = new Object();
+            private static readonly object DESERIALIZE_LOCK = new object();
 
             private static T DeserializeStream<T>(Stream stream)
             {
                 lock (DESERIALIZE_LOCK)
                 {
-                    using (StreamReader reader = new StreamReader(stream, leaveOpen: false))
-                    using (JsonTextReader jsonReader = new JsonTextReader(reader))
+                    using (var reader = new StreamReader(stream, leaveOpen: false))
+                    using (var jsonReader = new JsonTextReader(reader))
                     {
                         return json.Deserialize<T>(jsonReader);
                     }
                 }
             }
-            public static async Task<T> DeserializeFromUrlAsync<T>(String url)
+            public static async Task<T> DeserializeFromUrlAsync<T>(string url)
             {
-                HttpRequestMessage request = new HttpRequestMessage(
+                var request = new HttpRequestMessage(
                     HttpMethod.Get,
                     url
                 );
-                HttpResponseMessage req = await client.SendAsync(request);
-                Stream jsonStream = await req.Content.ReadAsStreamAsync();
+                var req = await client.SendAsync(request);
+                var jsonStream = await req.Content.ReadAsStreamAsync();
                 return DeserializeStream<T>(jsonStream);
             }
         }
@@ -51,11 +50,11 @@ namespace Api.HOS
             int totalAlbums = -1;
             int processed = 0;
 
-            List<Album> albumList = new List<Album>();
+            var albumList = new List<Album>();
 
             for (int page = 0; totalAlbums == -1 || processed < totalAlbums; page++)
             {
-                AlbumCollection albums = await WebJson.DeserializeFromUrlAsync<AlbumCollection>($"http://api.hos.com/api/v1/albums?page={page}&size=50");
+                var albums = await WebJson.DeserializeFromUrlAsync<AlbumCollection>($"http://api.hos.com/api/v1/albums?page={page}&size=50");
 
                 if (page == 0)
                     totalAlbums = albums.totalElements;

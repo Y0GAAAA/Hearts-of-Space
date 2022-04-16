@@ -15,16 +15,16 @@ namespace Api.Youtube.Official
 
         public PlaylistManager(YouTubeService youTubeService)
         {
-            PlaylistsResource.ListRequest playlistsReq = youTubeService.Playlists.List("snippet,id,contentDetails");
+            var playlistsReq = youTubeService.Playlists.List("snippet,id,contentDetails");
             playlistsReq.Mine = true;
-            playlists = (List<Playlist>)playlistsReq.Execute().Items;
+            playlists = (List<Playlist>) playlistsReq.Execute().Items;
             youtubeClient = youTubeService;
         }
 
-        public System.Boolean PlaylistExists(System.String title) => playlists.Any(p => p.Snippet.Title == title);
-        public async Task<Playlist> CreatePlaylistAsync(System.String title)
+        public bool PlaylistExists(string title) => playlists.Any(p => p.Snippet.Title == title);
+        public async Task<Playlist> CreatePlaylistAsync(string title)
         {
-            Playlist playlist = new Playlist()
+            var playlist = new Playlist()
             {
                 Snippet = new() { Title = title },
             };
@@ -40,7 +40,7 @@ namespace Api.Youtube.Official
         }
         public async Task AddVideoToPlaylistAsync(PlaylistId playlistId, VideoId videoId)
         {
-            PlaylistItem playlistItem = new PlaylistItem()
+            var playlistItem = new PlaylistItem()
             {
                 Snippet = new()
                 {
