@@ -5,6 +5,7 @@ using LibVLCSharp.Shared;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Client.Audio
@@ -17,6 +18,8 @@ namespace Client.Audio
 
         private readonly Queue<Track> trackQueue = new Queue<Track>();
         private readonly MediaPlayer player;
+        
+        private CancellationTokenSource playCancellationTokenSource = new CancellationTokenSource();
 
         public event EventHandler<Track[]> QueueChanged = (_, _) => { };
 
@@ -84,19 +87,24 @@ namespace Client.Audio
 
         public async Task<PlayTrackResult> PlayTrackAsync(Track track)
         {
-            var searchResult = await youtubeSearcher.SearchSongAsync(track)
+            var t = playCancellationTokenSource.Token;
+            t.Register(() => { 
+                playCancellationTokenSource = new CancellationTokenSource(); 
+            });
+            
+            var searchResult = await youtubeSearcher.SearchSongAsync(track, t)
                                                     .WithUITask("searching");
-
+            
             if (searchResult is null)
             {
                 return PlayTrackResult.NoTrackFound;
             }
 
-            string streamUrl = await youtubeDownloader.GetAudioStreamUrlAsync(searchResult.Id)
-                                                   .WithUITask("downloading");
+            string streamUrl = await youtubeDownloader.GetAudioStreamUrlAsync(searchResult.Id, t)
+                                                      .WithUITask("downloading");
 
             using var media = new Media(libVlc, new Uri(streamUrl));
-            var parseResult = await media.Parse(MediaParseOptions.ParseNetwork)
+            var parseResult = await media.Parse(MediaParseOptions.ParseNetwork, cancellationToken: t)
                                          .WithUITask("parsing");
 
             if (parseResult is not MediaParsedStatus.Done)
