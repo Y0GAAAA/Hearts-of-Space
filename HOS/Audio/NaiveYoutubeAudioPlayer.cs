@@ -18,7 +18,7 @@ namespace Client.Audio
         private readonly Queue<Track> trackQueue = new Queue<Track>();
         private readonly MediaPlayer player;
 
-        public event EventHandler<Track[]> QueueChanged = (_, _) => {};
+        public event EventHandler<Track[]> QueueChanged = (_, _) => { };
 
         static NaiveYoutubeAudioPlayer()
         {
@@ -36,7 +36,7 @@ namespace Client.Audio
                 });
             };
         }
-       
+
         public string TimeStatus
         {
             get
