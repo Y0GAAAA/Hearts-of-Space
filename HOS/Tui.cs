@@ -88,10 +88,11 @@ namespace Client
         }
 
         #region UI GLOBALS
+        private const int LEFT_PANE_WIDTH = 32;
 
         private readonly ListView categorySelectionView = new ListView(CATEGORIES) { Y = 8, Width = 8, Height = CATEGORIES.Length, TabIndex = 1 };
-        private readonly TableView mainTableView = new TableView() { X = 22, Y = 2, Width = Dim.Percent(80), Height = Dim.Fill(1), TabIndex = 0 };
-        private readonly ListView runningTasksView = new ListView(UITasks.tasks) { X = 0, Y = 20, Width = 20, Height = Dim.Sized(UITasks.MAX_TASK_COUNT), CanFocus = false, TabStop = false };
+        private readonly TableView mainTableView = new TableView() { X = LEFT_PANE_WIDTH + 2, Y = 2, Width = Dim.Percent(80), Height = Dim.Fill(1), TabIndex = 0 };
+        private readonly ListView runningTasksView = new ListView(UITasks.tasks) { X = 0, Y = 20, Width = LEFT_PANE_WIDTH, Height = Dim.Sized(UITasks.MAX_TASK_COUNT), CanFocus = false, TabStop = false };
         private readonly Label timestampLabel = new Label() { Y = 1, Width = Dim.Fill(), TextAlignment = TextAlignment.Right, CanFocus = false, TabStop = false };
         private readonly Label phraseLabel = new Label("slow music for fast times") { X = 4, Y = 0, CanFocus = false };
         private readonly ListView queueView;
@@ -99,7 +100,7 @@ namespace Client
         // Initialize UI globals that need to refer to other components in the Tui constructor
         public Tui()
         {
-            queueView = new ListView() { X = 0, Y = Pos.Bottom(runningTasksView), Width = 20, Height = Dim.Fill(), CanFocus = false, TabStop = false };
+            queueView = new ListView() { X = 0, Y = Pos.Bottom(runningTasksView) + 1, Width = LEFT_PANE_WIDTH, Height = Dim.Fill(), CanFocus = false, TabStop = false };
         }
 
         #endregion
@@ -108,7 +109,8 @@ namespace Client
         {
             Application.Init();
 
-            audioPlayer.QueueChanged += (_, q) => {
+            audioPlayer.QueueChanged += (_, q) =>
+            {
                 var stringizedQueue = q.Select(t => t.ToString())
                                        .ToList();
                 queueView.SetSource(stringizedQueue);
@@ -143,6 +145,7 @@ namespace Client
             window.Add(timestampLabel);
             window.Add(runningTasksView);
             window.Add(queueView);
+            window.Add(new Label("- Queue -") { X = LEFT_PANE_WIDTH / 2 - 5, Y = Pos.Bottom(runningTasksView), CanFocus = false, TabStop = false, ColorScheme = new ColorScheme() { Normal = Attribute.Make(Color.Magenta, Color.Black) } });
 
             window.ColorScheme = new ColorScheme
             {
