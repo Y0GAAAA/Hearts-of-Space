@@ -108,6 +108,12 @@ namespace Client
         {
             Application.Init();
 
+            audioPlayer.QueueChanged += (_, q) => {
+                var stringizedQueue = q.Select(t => t.ToString())
+                                       .ToList();
+                queueView.SetSource(stringizedQueue);
+            };
+
             mainTableView.KeyDown += (ke) => MainTableView_KeyDown(ke, mainTableView.SelectedRow);
             mainTableView.SelectedCellChanged += MainTableView_SelectedCellChanged;
 
