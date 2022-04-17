@@ -17,6 +17,7 @@ namespace Api.HOS.Json
         {
             return track.ToArray();
         }
+        public override string ToString() => $"{title} - {artists[0].name}";
     }
     public class Artist
     {

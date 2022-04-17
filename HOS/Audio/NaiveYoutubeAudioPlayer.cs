@@ -18,6 +18,8 @@ namespace Client.Audio
         private readonly Queue<Track> trackQueue = new Queue<Track>();
         private readonly MediaPlayer player;
 
+        public event EventHandler<Track[]> QueueChanged = (_, _) => { };
+
         static NaiveYoutubeAudioPlayer()
         {
             Core.Initialize();
@@ -75,6 +77,7 @@ namespace Client.Audio
             foreach (var t in track)
             {
                 trackQueue.Enqueue(t);
+                QueueChanged.Invoke(null, trackQueue.ToArray());
                 Debug.WriteLine($"added track (id {t.id}) to queue; length of queue is {trackQueue.Count}");
             }
         }
@@ -131,6 +134,7 @@ namespace Client.Audio
             if (trackQueue.Count > 0)
             {
                 var nextTrack = trackQueue.Dequeue();
+                QueueChanged.Invoke(null, trackQueue.ToArray());
                 await PlayTrackWithVisualFeedbackAsync(nextTrack);
                 return true;
             }
