@@ -1,10 +1,12 @@
 ﻿using Api.HOS.Json;
 using Api.Youtube;
 using Client.UI;
+using Global.Util;
 using LibVLCSharp.Shared;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Client.Audio
@@ -17,6 +19,9 @@ namespace Client.Audio
 
         private readonly Queue<Track> trackQueue = new Queue<Track>();
         private readonly MediaPlayer player;
+
+        private CancellationTokenSource playCancellationTokenSource = new CancellationTokenSource();
+        private Task<PlayTrackResult> currentPlayTask = null;
 
         public event EventHandler<Track[]> QueueChanged = (_, _) => { };
 
@@ -63,7 +68,6 @@ namespace Client.Audio
         public string PlayingStatus => player.IsPlaying ? "playing" : "paused";
         public bool HasMedia => player.Media is not null;
         public bool MediaEndReached { get; private set; } = true;
-
         public enum PlayTrackResult
         {
             Success,
@@ -82,9 +86,9 @@ namespace Client.Audio
             }
         }
 
-        public async Task<PlayTrackResult> PlayTrackAsync(Track track)
+        private async Task<PlayTrackResult> PlayTrackAsync(Track track, CancellationToken token = default)
         {
-            var searchResult = await youtubeSearcher.SearchSongAsync(track)
+            var searchResult = await youtubeSearcher.SearchSongAsync(track, token)
                                                     .WithUITask("searching");
 
             if (searchResult is null)
@@ -92,11 +96,11 @@ namespace Client.Audio
                 return PlayTrackResult.NoTrackFound;
             }
 
-            string streamUrl = await youtubeDownloader.GetAudioStreamUrlAsync(searchResult.Id)
-                                                   .WithUITask("downloading");
+            string streamUrl = await youtubeDownloader.GetAudioStreamUrlAsync(searchResult.Id, token)
+                                                            .WithUITask("downloading");
 
             using var media = new Media(libVlc, new Uri(streamUrl));
-            var parseResult = await media.Parse(MediaParseOptions.ParseNetwork)
+            var parseResult = await media.Parse(MediaParseOptions.ParseNetwork, cancellationToken: token)
                                          .WithUITask("parsing");
 
             if (parseResult is not MediaParsedStatus.Done)
@@ -113,7 +117,22 @@ namespace Client.Audio
 
         public async Task PlayTrackWithVisualFeedbackAsync(Track track)
         {
-            var result = await PlayTrackAsync(track);
+            playCancellationTokenSource.Cancel();
+            if (currentPlayTask is not null && !currentPlayTask.IsCompletedSuccessfully)
+                await currentPlayTask.WaitAsync();
+            playCancellationTokenSource = new CancellationTokenSource();
+
+            PlayTrackResult result;
+            try
+            {
+                currentPlayTask = PlayTrackAsync(track, playCancellationTokenSource.Token);
+                result = await currentPlayTask;
+            }
+            catch (TaskCanceledException)
+            {
+                Debug.WriteLine("play task cancelled");
+                return;
+            }
 
             string errorString = result switch
             {

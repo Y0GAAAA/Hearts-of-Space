@@ -40,9 +40,12 @@ namespace Client
                 );
             }
 
-            await t;
-
-            lock (TASK_MANIPULATE_LOCK) { RemoveTaskById(id); }
+            try { await t; }
+            catch { throw; }
+            finally
+            {
+                lock (TASK_MANIPULATE_LOCK) { RemoveTaskById(id); }
+            }
         }
         public static async Task<T> WithUITask<T>(this Task<T> t, string? title)
         {
@@ -55,11 +58,12 @@ namespace Client
                 );
             }
 
-            var value = await t;
-
-            lock (TASK_MANIPULATE_LOCK) { RemoveTaskById(id); }
-
-            return value;
+            try { return await t; }
+            catch { throw; }
+            finally
+            {
+                lock (TASK_MANIPULATE_LOCK) { RemoveTaskById(id); }
+            }
         }
     }
 }
