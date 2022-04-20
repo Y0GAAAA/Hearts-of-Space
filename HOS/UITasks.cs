@@ -13,7 +13,8 @@ namespace Client
         public static readonly List<TaskData> tasks = new List<TaskData>();
         private static readonly object TASK_MANIPULATE_LOCK = new object();
 
-        public const int MAX_TASK_COUNT = 8;
+        private const int MAX_TASK_COUNT = int.MaxValue;
+        public const int MAX_VISIBLE_TASK_COUNT = 8;
         private const string UNKNOWN_TASK_TITLE = "<phantom task>";
 
         #region MUST be used in sync-lock
