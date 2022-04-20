@@ -39,7 +39,7 @@ namespace Client
 
         #endregion
 
-        private static readonly string[] CATEGORIES = new string[] { "Albums", "Channels" };
+        private static readonly string[] CATEGORIES = new string[] { "Albums", "Channels", "Favorites" };
 
         /* - CACHED CATEGORIES - */
         private readonly AsyncLazy<DataTable> ALBUM_TABLE = new AsyncLazy<DataTable>(() => Task.Run(async () =>
@@ -90,7 +90,7 @@ namespace Client
         #region UI GLOBALS
         private const int LEFT_PANE_WIDTH = 32;
 
-        private readonly ListView categorySelectionView = new ListView(CATEGORIES) { Y = 8, Width = 8, Height = CATEGORIES.Length, TabIndex = 1 };
+        private readonly ListView categorySelectionView = new ListView(CATEGORIES) { Y = 8, Width = LEFT_PANE_WIDTH, Height = CATEGORIES.Length, TabIndex = 1 };
         private readonly TableView mainTableView = new TableView() { X = LEFT_PANE_WIDTH + 2, Y = 2, Width = Dim.Percent(80), Height = Dim.Fill(1), TabIndex = 0 };
         private readonly ListView runningTasksView = new ListView(UITasks.tasks) { X = 0, Y = 20, Width = LEFT_PANE_WIDTH, Height = Dim.Sized(UITasks.MAX_VISIBLE_TASK_COUNT), CanFocus = false, TabStop = false };
         private readonly Label timestampLabel = new Label() { Y = 1, Width = Dim.Fill(), TextAlignment = TextAlignment.Right, CanFocus = false, TabStop = false };
