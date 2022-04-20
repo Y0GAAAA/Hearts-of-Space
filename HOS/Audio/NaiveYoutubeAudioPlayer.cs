@@ -6,7 +6,6 @@ using LibVLCSharp.Shared;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -20,7 +19,7 @@ namespace Client.Audio
 
         private readonly Queue<Track> trackQueue = new Queue<Track>();
         private readonly MediaPlayer player;
-        
+
         private CancellationTokenSource playCancellationTokenSource = new CancellationTokenSource();
         private Task<PlayTrackResult> currentPlayTask = null;
 
@@ -88,7 +87,7 @@ namespace Client.Audio
         }
 
         private async Task<PlayTrackResult> PlayTrackAsync(Track track, CancellationToken token = default)
-        {   
+        {
             var searchResult = await youtubeSearcher.SearchSongAsync(track, token)
                                                     .WithUITask("searching");
 
@@ -122,17 +121,19 @@ namespace Client.Audio
             if (currentPlayTask is not null && !currentPlayTask.IsCompletedSuccessfully)
                 await currentPlayTask.WaitAsync();
             playCancellationTokenSource = new CancellationTokenSource();
-             
+
             PlayTrackResult result;
             try
             {
                 currentPlayTask = PlayTrackAsync(track, playCancellationTokenSource.Token);
                 result = await currentPlayTask;
-            } catch (TaskCanceledException) {
+            }
+            catch (TaskCanceledException)
+            {
                 Debug.WriteLine("play task cancelled");
                 return;
             }
-            
+
             string errorString = result switch
             {
                 PlayTrackResult.NetworkParsingFailed => "Network parsing failed",
