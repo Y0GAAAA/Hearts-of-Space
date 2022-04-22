@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Global.Util
 {
@@ -13,6 +14,12 @@ namespace Global.Util
                 foreach (var item in enumerable)
                     yield return item;
             }
+        }
+
+        public static void AddWhile<R>(this ICollection<R> collection, Func<bool> predicate, Func<R> f)
+        {
+            while (predicate())
+                collection.Add(f());
         }
     }
 }
