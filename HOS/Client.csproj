@@ -11,7 +11,7 @@
 
   <ItemGroup>
     <PackageReference Include="LibVLCSharp" Version="3.6.6" />
-    <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="6.0.4" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="6.0.4" />
     <PackageReference Include="Terminal.Gui" Version="1.4.0" />
     <PackageReference Include="VideoLAN.LibVLC.Windows" Version="3.0.16" />
   </ItemGroup>
