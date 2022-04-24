@@ -44,7 +44,8 @@ namespace Global.Table
         }
         private static DataTable GetFavoriteTableBase()
         {
-            return new HandyDataTable().AddColumn<string>("Type");
+            return new HandyDataTable().AddColumn<int>("id")
+                                       .AddColumn<string>("type");
         }
     }
 }
