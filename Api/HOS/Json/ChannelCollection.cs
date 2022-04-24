@@ -11,7 +11,7 @@ namespace Api.HOS.Json
         public string description { get; set; }
         public ChannelProgram[] programs { get; set; }
 
-        public DataRow GetRow() => TableBase.ChannelTableBase.NewRow(id, name, description);
+        public object[] GetRow() => new object[]{ id, name, description };
     }
     public class ChannelProgram : IDataRow
     {
@@ -19,6 +19,6 @@ namespace Api.HOS.Json
         public string title { get; set; }
         public string shortDescription { get; set; }
 
-        public DataRow GetRow() => TableBase.ChannelProgramTableBase.NewRow(id, title, shortDescription);
+        public object[] GetRow() => new object[]{ id, title, shortDescription};
     }
 }

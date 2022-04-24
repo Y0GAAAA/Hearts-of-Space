@@ -22,7 +22,7 @@ namespace Api.HOS.Json
         }
         public override string ToString() => $"{title} - {artists[0].name}";
 
-        public DataRow GetRow() => TableBase.ChannelProgramTrackTableBase.NewRow(id, title, artists.First().name, duration);
+        public object[] GetRow() => new object[] { id, title, artists.First().name, duration };
     }
     public class Artist
     {

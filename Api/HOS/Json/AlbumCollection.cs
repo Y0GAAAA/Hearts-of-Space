@@ -1,5 +1,7 @@
 ﻿using Global.Table;
 using Global.Util;
+using System;
+using System.Collections;
 using System.Data;
 
 namespace Api.HOS.Json
@@ -18,6 +20,6 @@ namespace Api.HOS.Json
         public string title { get; set; }
         public int duration { get; set; }
 
-        public DataRow GetRow() => TableBase.AlbumTableBase.NewRow(id, title, attribution, duration);
+        public object[] GetRow() => new object[] { id, title, attribution, duration };
     }
 }
