@@ -60,6 +60,13 @@ namespace Api.HOS
         }
 
         public static async Task<Album[]> GetAlbumsAsync() => await albumsLazy.GetAsync();
+        
+        public static async Task<Album[]> GetAlbumsAsync(IEnumerable<int> albumIds)
+        {
+            return (await GetAlbumsAsync()).Where(a => albumIds.Contains(a.id))
+                                           .ToArray();
+        }
+
         public static async Task<Channel[]> GetChannelsAsync() => await channelsLazy.GetAsync();
         public static async Task<Track[]> GetAlbumTracksAsync(int albumId)
         {
@@ -96,5 +103,12 @@ namespace Api.HOS
 
         // async function even though it's not needed; there to have an uniform api
         public static async Task<ChannelProgram[]> GetChannelProgramsAsync(int channelId) => channelPrograms[channelId];
+        public static async Task<ChannelProgram[]> GetChannelProgramsAsync(int[] programIds)
+        {
+            return channelPrograms.Values.SelectMany(cp => cp)
+                                         .Where(cp => programIds.Contains(cp.id))
+                                         .ToArray();
+        }
+
     }
 }
