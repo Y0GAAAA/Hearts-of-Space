@@ -103,7 +103,7 @@ namespace Api.HOS
 
         // async function even though it's not needed; there to have an uniform api
         public static async Task<ChannelProgram[]> GetChannelProgramsAsync(int channelId) => channelPrograms[channelId];
-        public static async Task<ChannelProgram[]> GetChannelProgramsAsync(int[] programIds)
+        public static async Task<ChannelProgram[]> GetChannelProgramsAsync(IEnumerable<int> programIds)
         {
             return channelPrograms.Values.SelectMany(cp => cp)
                                          .Where(cp => programIds.Contains(cp.id))
