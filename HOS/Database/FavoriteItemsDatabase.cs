@@ -3,9 +3,7 @@ using Microsoft.Data.Sqlite;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Client.Database
@@ -44,7 +42,7 @@ namespace Client.Database
         #endregion
 
         private readonly SqliteConnection connection;
-        
+
         public enum ItemType
         {
             Album,
@@ -76,15 +74,16 @@ namespace Client.Database
             try
             {
                 await command.ExecuteNonQueryAsync();
-            } catch (DbException ex) { if (ex.ErrorCode != -2147467259) throw; }
+            }
+            catch (DbException ex) { if (ex.ErrorCode != -2147467259) throw; }
         }
-        public async Task<Int32[]> Get(ItemType type)
+        public async Task<int[]> Get(ItemType type)
         {
             string sql = SelectSqlString(type);
             var reader = await GetCommand(sql).ExecuteReaderAsync();
-            var list = new List<Int32>();
+            var list = new List<int>();
             list.AddWhile(
-                () => reader.Read(), 
+                () => reader.Read(),
                 () => reader.GetInt32(0)
             );
             return list.ToArray();

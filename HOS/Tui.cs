@@ -6,7 +6,6 @@ using Client.UI;
 using Global.Table;
 using Global.Util;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -41,7 +40,7 @@ namespace Client
             ConsultingChannelProgramTracks,
 
             ConsultingFavorites,
-            ConsultingFavoriteAlbums,   
+            ConsultingFavoriteAlbums,
             ConsultingFavoritePrograms,
         }
 
@@ -60,7 +59,8 @@ namespace Client
             var channels = await CachedHOSApi.GetChannelsAsync();
             return channels.ToDataTable(TableBase.ChannelTableBase);
         }));
-        private readonly AsyncLazy<DataTable> FAVORITE_TABLE = new AsyncLazy<DataTable>(() => Task.Run(async () => {
+        private readonly AsyncLazy<DataTable> FAVORITE_TABLE = new AsyncLazy<DataTable>(() => Task.Run(async () =>
+        {
             var table = TableBase.FavoriteTableBase;
             table.Rows.Add(0, "Albums");
             table.Rows.Add(1, "Programs");
@@ -333,8 +333,14 @@ namespace Client
         private async Task HandleFavorite(DataRow row)
         {
             FavoriteItemsDatabase.ItemType type;
-            if (CurrentStep == Step.ConsultingAlbums) type = FavoriteItemsDatabase.ItemType.Album;
-            else if (CurrentStep == Step.ConsultingChannelPrograms) type = FavoriteItemsDatabase.ItemType.Program;
+            if (CurrentStep == Step.ConsultingAlbums)
+            {
+                type = FavoriteItemsDatabase.ItemType.Album;
+            }
+            else if (CurrentStep == Step.ConsultingChannelPrograms)
+            {
+                type = FavoriteItemsDatabase.ItemType.Program;
+            }
             else { return; }
 
             int id = row.Field<int>("id");
@@ -386,7 +392,7 @@ namespace Client
         private async Task DisplayFavoriteCategory(int categoryId)
         {
             var type = (FavoriteItemsDatabase.ItemType) categoryId;
-            var itemIds = await favoritesDatabase.Get(type);
+            int[] itemIds = await favoritesDatabase.Get(type);
             await (type switch
             {
                 FavoriteItemsDatabase.ItemType.Album => DisplayFavoriteAlbums(itemIds),
