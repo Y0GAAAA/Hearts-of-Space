@@ -1,10 +1,12 @@
 ﻿using Api.HOS;
 using Api.HOS.Json;
 using Client.Audio;
+using Client.Database;
 using Client.UI;
 using Global.Table;
 using Global.Util;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
@@ -25,6 +27,7 @@ namespace Client
         {
             Albums = 0,
             Channels = 1,
+            Favorites = 2,
         }
 
         public enum Step
@@ -35,35 +38,32 @@ namespace Client
             ConsultingChannels,
             ConsultingChannelPrograms,
             ConsultingChannelProgramTracks,
+
+            ConsultingFavorites,
+            ConsultingFavoriteAlbums,
+            ConsultingFavoritePrograms,
         }
 
         #endregion
 
-        private static readonly string[] CATEGORIES = new string[] { "Albums", "Channels" };
+        private static readonly string[] CATEGORIES = new string[] { "Albums", "Channels", "Favorites" };
 
         /* - CACHED CATEGORIES - */
         private readonly AsyncLazy<DataTable> ALBUM_TABLE = new AsyncLazy<DataTable>(() => Task.Run(async () =>
         {
-            var table = TableBase.AlbumTableBase;
             var albums = await CachedHOSApi.GetAlbumsAsync();
-
-            foreach (var album in albums)
-            {
-                table.Rows.Add(album.id, album.title, album.attribution, album.duration);
-            }
-
-            return table;
+            return albums.ToDataTable(TableBase.AlbumTableBase);
         }));
         private readonly AsyncLazy<DataTable> CHANNEL_TABLE = new AsyncLazy<DataTable>(() => Task.Run(async () =>
         {
-            var table = TableBase.ChannelTableBase;
             var channels = await CachedHOSApi.GetChannelsAsync();
-
-            foreach (var channel in channels)
-            {
-                table.Rows.Add(channel.id, channel.name, channel.description);
-            }
-
+            return channels.ToDataTable(TableBase.ChannelTableBase);
+        }));
+        private readonly AsyncLazy<DataTable> FAVORITE_TABLE = new AsyncLazy<DataTable>(() => Task.Run(async () =>
+        {
+            var table = TableBase.FavoriteTableBase;
+            table.Rows.Add(0, "Albums");
+            table.Rows.Add(1, "Programs");
             return table;
         }));
 
@@ -73,6 +73,9 @@ namespace Client
         /* - "PREVIOUS" BUTTON - */
         private readonly LimitedStack<StepData> stepHistory = new LimitedStack<StepData>(16);
 
+        /* - Favorite DB - */
+        private readonly FavoriteItemsDatabase favoritesDatabase = new FavoriteItemsDatabase();
+
         private Step CurrentStep => stepHistory.Peek()?.Step ?? throw new NotImplementedException("unreachable");
 
         private async Task<Track[]> GetTracksAsync(int id)
@@ -81,8 +84,8 @@ namespace Client
             {
                 Step.ConsultingAlbumTracks => (await CachedHOSApi.GetAlbumTrackById(id)).ToArray(),
                 Step.ConsultingChannelProgramTracks => (await CachedHOSApi.GetProgramTrackById(id)).ToArray(),
-                Step.ConsultingAlbums => await CachedHOSApi.GetAlbumTracksAsync(id),
-                Step.ConsultingChannelPrograms => (await CachedHOSApi.GetProgramTracksAsync(id)).SelectMany(x => x.tracks).ToArray(),
+                Step.ConsultingAlbums or Step.ConsultingFavoriteAlbums => await CachedHOSApi.GetAlbumTracksAsync(id),
+                Step.ConsultingChannelPrograms or Step.ConsultingFavoritePrograms => (await CachedHOSApi.GetProgramTracksAsync(id)).SelectMany(x => x.tracks).ToArray(),
                 _ => null,
             };
         }
@@ -90,7 +93,7 @@ namespace Client
         #region UI GLOBALS
         private const int LEFT_PANE_WIDTH = 32;
 
-        private readonly ListView categorySelectionView = new ListView(CATEGORIES) { Y = 8, Width = 8, Height = CATEGORIES.Length, TabIndex = 1 };
+        private readonly ListView categorySelectionView = new ListView(CATEGORIES) { Y = 8, Width = LEFT_PANE_WIDTH, Height = CATEGORIES.Length, TabIndex = 1 };
         private readonly TableView mainTableView = new TableView() { X = LEFT_PANE_WIDTH + 2, Y = 2, Width = Dim.Percent(80), Height = Dim.Fill(1), TabIndex = 0 };
         private readonly ListView runningTasksView = new ListView(UITasks.tasks) { X = 0, Y = 20, Width = LEFT_PANE_WIDTH, Height = Dim.Sized(UITasks.MAX_VISIBLE_TASK_COUNT), CanFocus = false, TabStop = false };
         private readonly Label timestampLabel = new Label() { Y = 1, Width = Dim.Fill(), TextAlignment = TextAlignment.Right, CanFocus = false, TabStop = false };
@@ -131,6 +134,7 @@ namespace Client
                     new MenuItem("More", "M", null),
                     new MenuItem("Add to queue", "Q", null),
                     new MenuItem("Next song", "N", null),
+                    new MenuItem("Add to favorites", "F", null),
                     new MenuItem("Navigate back", "Esc", null),
                     new MenuItem("Play/Pause", "Space", null),
 
@@ -222,6 +226,7 @@ namespace Client
             {
                 (int) Category.Albums => DisplayAlbums(),
                 (int) Category.Channels => DisplayChannels(),
+                (int) Category.Favorites => DisplayFavorites(),
                 _ => Task.CompletedTask,
             });
         }
@@ -237,6 +242,7 @@ namespace Client
 
             await (keyCode switch
             {
+                102 or 70 => HandleFavorite(row),
                 109 or 77 => HandleMore(row),
                 110 or 78 => HandleNext(),
                 112 or 80 => HandlePlay(row),
@@ -244,7 +250,6 @@ namespace Client
                 _ => Task.CompletedTask,
             });
         }
-
         #endregion
 
         public void SetCurrentStepData(Step step, int id = 0) => stepHistory.Add(new StepData(step, id));
@@ -255,9 +260,10 @@ namespace Client
             int id = row.Field<int>(0);
             await (CurrentStep switch
             {
-                Step.ConsultingAlbums => DisplayAlbumTracks(id),
+                Step.ConsultingAlbums or Step.ConsultingFavoriteAlbums => DisplayAlbumTracks(id),
                 Step.ConsultingChannels => DisplayChannelPrograms(id),
-                Step.ConsultingChannelPrograms => DisplayChannelProgramTracks(id),
+                Step.ConsultingChannelPrograms or Step.ConsultingFavoritePrograms => DisplayChannelProgramTracks(id),
+                Step.ConsultingFavorites => DisplayFavoriteCategory(id),
                 _ => Task.CompletedTask,
             });
         }
@@ -310,6 +316,9 @@ namespace Client
                 Step.ConsultingChannels => DisplayChannels(),
                 Step.ConsultingChannelPrograms => DisplayChannelPrograms(id),
                 Step.ConsultingChannelProgramTracks => DisplayChannelProgramTracks(id),
+                Step.ConsultingFavorites => DisplayFavorites(),
+                Step.ConsultingFavoriteAlbums => DisplayFavoriteCategory(0),
+                Step.ConsultingFavoritePrograms => DisplayFavoriteCategory(1),
                 _ => Task.CompletedTask,
             });
         }
@@ -320,6 +329,23 @@ namespace Client
             {
                 ErrorBox.Show("No tracks in queue");
             }
+        }
+        private async Task HandleFavorite(DataRow row)
+        {
+            FavoriteItemsDatabase.ItemType type;
+            if (CurrentStep == Step.ConsultingAlbums)
+            {
+                type = FavoriteItemsDatabase.ItemType.Album;
+            }
+            else if (CurrentStep == Step.ConsultingChannelPrograms)
+            {
+                type = FavoriteItemsDatabase.ItemType.Program;
+            }
+            else { return; }
+
+            int id = row.Field<int>("id");
+
+            await favoritesDatabase.Add(type, id);
         }
         #endregion
 
@@ -336,7 +362,7 @@ namespace Client
             SetCurrentStepData(Step.ConsultingAlbumTracks, albumId);
             var albumTracks = await CachedHOSApi.GetAlbumTracksAsync(albumId)
                                           .WithUITask("getting tracks");
-            mainTableView.Table = albumTracks.ToDataTable();
+            mainTableView.Table = albumTracks.ToDataTable(TableBase.TrackTableBase);
         }
         private async Task DisplayChannels()
         {
@@ -348,14 +374,43 @@ namespace Client
         private async Task DisplayChannelPrograms(int channelId)
         {
             SetCurrentStepData(Step.ConsultingChannelPrograms, channelId);
-            mainTableView.Table = (await CachedHOSApi.GetChannelProgramsAsync(channelId)).ToDataTable();
+            mainTableView.Table = (await CachedHOSApi.GetChannelProgramsAsync(channelId)).ToDataTable(TableBase.ChannelProgramTableBase);
         }
         private async Task DisplayChannelProgramTracks(int programId)
         {
             SetCurrentStepData(Step.ConsultingChannelProgramTracks, programId);
             var programTracks = await CachedHOSApi.GetProgramTracksAsync(programId)
-                                            .WithUITask("getting tracks");
-            mainTableView.Table = programTracks.ToDataTable();
+                                                  .WithUITask("getting tracks");
+            var tracks = programTracks.SelectMany(p => p.tracks).ToArray();
+            mainTableView.Table = tracks.ToDataTable(TableBase.TrackTableBase);
+        }
+        private async Task DisplayFavorites()
+        {
+            SetCurrentStepData(Step.ConsultingFavorites);
+            mainTableView.Table = await FAVORITE_TABLE.GetAsync();
+        }
+        private async Task DisplayFavoriteCategory(int categoryId)
+        {
+            var type = (FavoriteItemsDatabase.ItemType) categoryId;
+            int[] itemIds = await favoritesDatabase.Get(type);
+            await (type switch
+            {
+                FavoriteItemsDatabase.ItemType.Album => DisplayFavoriteAlbums(itemIds),
+                FavoriteItemsDatabase.ItemType.Program => DisplayFavoriteChannelPrograms(itemIds),
+                _ => throw new NotImplementedException("unreachable"),
+            });
+        }
+        private async Task DisplayFavoriteAlbums(IEnumerable<int> ids)
+        {
+            SetCurrentStepData(Step.ConsultingFavoriteAlbums);
+            var albums = await CachedHOSApi.GetAlbumsAsync(ids);
+            mainTableView.Table = albums.ToDataTable(TableBase.AlbumTableBase);
+        }
+        private async Task DisplayFavoriteChannelPrograms(IEnumerable<int> ids)
+        {
+            SetCurrentStepData(Step.ConsultingFavoritePrograms);
+            var programs = await CachedHOSApi.GetChannelProgramsAsync(ids);
+            mainTableView.Table = programs.ToDataTable(TableBase.ChannelProgramTableBase);
         }
         #endregion
     }
