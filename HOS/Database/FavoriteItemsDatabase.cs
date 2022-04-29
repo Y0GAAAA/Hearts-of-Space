@@ -2,6 +2,7 @@
 using Microsoft.Data.Sqlite;
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -26,10 +27,10 @@ namespace Client.Database
         private const string CREATE_TABLES =
         @"
         CREATE TABLE IF NOT EXISTS albums (
-            id INTEGER NOT NULL
+            id INTEGER NOT NULL UNIQUE
         );
         CREATE TABLE IF NOT EXISTS programs (
-            id INTEGER NOT NULL
+            id INTEGER NOT NULL UNIQUE
         );
         ";
         private string GetTableName(ItemType type) => type switch
@@ -72,7 +73,10 @@ namespace Client.Database
             string sql = AddSqlString(type);
             var command = GetCommand(sql);
             command.Parameters.AddWithValue("@id", id);
-            await command.ExecuteNonQueryAsync();
+            try
+            {
+                await command.ExecuteNonQueryAsync();
+            } catch (DbException ex) { if (ex.ErrorCode != -2147467259) throw; }
         }
         public async Task<Int32[]> Get(ItemType type)
         {
