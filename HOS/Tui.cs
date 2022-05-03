@@ -217,6 +217,7 @@ namespace Client
             int columnCount = obj.Table.Columns.Count;
             var multiselectParameters = new TableView.TableSelection(new Point(0, y), new Rect(0, y, columnCount, 1));
 
+            mainTableView.MultiSelectedRegions.Clear();
             mainTableView.MultiSelectedRegions.Push(multiselectParameters);
         }
 
