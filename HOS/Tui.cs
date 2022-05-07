@@ -230,6 +230,8 @@ namespace Client
                 (int) Category.Favorites => DisplayFavorites(),
                 _ => Task.CompletedTask,
             });
+            if (mainTableView.Table.Rows.Count > 0)
+                mainTableView.SelectedRow = 0;
         }
         private async void MainTableView_KeyDown(View.KeyEventEventArgs obj, int selectedRow)
         {
