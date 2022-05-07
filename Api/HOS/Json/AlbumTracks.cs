@@ -1,6 +1,4 @@
-﻿using Global.Table;
-using Global.Util;
-using System.Data;
+﻿using Global.Util;
 using System.Linq;
 
 namespace Api.HOS.Json
@@ -9,7 +7,10 @@ namespace Api.HOS.Json
     {
         public Track[] tracks { get; set; }
     }
-    public class Track : IDataRow
+    public class Track
+#if _HOSLIB
+    : IDataRow
+#endif
     {
         public int id { get; set; }
         public string title { get; set; }
@@ -21,8 +22,9 @@ namespace Api.HOS.Json
             return track.ToArray();
         }
         public override string ToString() => $"{title} - {artists[0].name}";
-
+#if _HOSLIB
         public object[] GetRow() => new object[] { id, title, artists.First().name, duration };
+#endif
     }
     public class Artist
     {

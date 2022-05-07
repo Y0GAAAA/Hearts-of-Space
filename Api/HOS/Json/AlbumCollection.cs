@@ -1,10 +1,4 @@
-﻿using Global.Table;
-using Global.Util;
-using System;
-using System.Collections;
-using System.Data;
-
-namespace Api.HOS.Json
+﻿namespace Api.HOS.Json
 {
 
     public class AlbumCollection
@@ -13,13 +7,17 @@ namespace Api.HOS.Json
         public int totalElements { get; set; }
     }
 
-    public class Album : IDataRow
+    public class Album
+#if _HOSLIB
+    : IDataRow
+#endif
     {
         public int id { get; set; }
         public string attribution { get; set; }
         public string title { get; set; }
         public int duration { get; set; }
-
+#if _HOSLIB
         public object[] GetRow() => new object[] { id, title, attribution, duration };
+#endif
     }
 }
