@@ -1,8 +1,4 @@
-﻿using Global.Table;
-using Global.Util;
-using System.Data;
-
-namespace Api.HOS.Json
+﻿namespace Api.HOS.Json
 {
     public class Channel
 #if _HOSLIB
@@ -14,7 +10,7 @@ namespace Api.HOS.Json
         public string description { get; set; }
         public ChannelProgram[] programs { get; set; }
 #if _HOSLIB
-        public object[] GetRow() => new object[]{ id, name, description };
+        public object[] GetRow() => new object[] { id, name, description };
 #endif
     }
     public class ChannelProgram
@@ -26,7 +22,7 @@ namespace Api.HOS.Json
         public string title { get; set; }
         public string shortDescription { get; set; }
 #if _HOSLIB
-        public object[] GetRow() => new object[]{ id, title, shortDescription};
+        public object[] GetRow() => new object[] { id, title, shortDescription };
 #endif
     }
 }

@@ -1,6 +1,4 @@
-﻿using Global.Table;
-using Global.Util;
-using System.Data;
+﻿using Global.Util;
 using System.Linq;
 
 namespace Api.HOS.Json
