@@ -25,10 +25,6 @@ namespace Client.Audio
 
         public event EventHandler<Track[]> QueueChanged = (_, _) => { };
 
-        static NaiveYoutubeAudioPlayer()
-        {
-            Core.Initialize();
-        }
         public NaiveYoutubeAudioPlayer()
         {
             player = new MediaPlayer(libVlc);
