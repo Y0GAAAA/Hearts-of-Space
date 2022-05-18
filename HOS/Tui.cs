@@ -110,8 +110,6 @@ namespace Client
 
         public void Run()
         {
-            Application.Init();
-
             audioPlayer.QueueChanged += (_, q) =>
             {
                 var stringizedQueue = q.Select(t => t.ToString())
