@@ -66,9 +66,9 @@ namespace Client
             table.Rows.Add(1, "Programs");
             return table;
         }));
-
+        
         /* - AUDIO - */
-        private readonly NaiveYoutubeAudioPlayer audioPlayer = new NaiveYoutubeAudioPlayer();
+        public readonly NaiveYoutubeAudioPlayer audioPlayer = new NaiveYoutubeAudioPlayer();
 
         /* - "PREVIOUS" BUTTON - */
         private readonly LimitedStack<StepData> stepHistory = new LimitedStack<StepData>(16);
