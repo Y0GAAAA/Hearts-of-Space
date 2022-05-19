@@ -13,24 +13,28 @@ namespace Client.Audio
 {
     public class NaiveYoutubeAudioPlayer
     {
-        private readonly LibVLC libVlc = new LibVLC(enableDebugLogs: false);
+        private LibVLC libVlc;
         private readonly Searcher youtubeSearcher = new Searcher();
         private readonly Downloader youtubeDownloader = new Downloader();
 
         private readonly Queue<Track> trackQueue = new Queue<Track>();
-        private readonly MediaPlayer player;
+        private MediaPlayer player;
 
         private CancellationTokenSource playCancellationTokenSource = new CancellationTokenSource();
         private Task<PlayTrackResult> currentPlayTask = null;
 
+        private bool _initialized = false;
+
         public event EventHandler<Track[]> QueueChanged = (_, _) => { };
 
-        static NaiveYoutubeAudioPlayer()
+        public NaiveYoutubeAudioPlayer() { }
+
+        public void Initialize()
         {
-            Core.Initialize();
-        }
-        public NaiveYoutubeAudioPlayer()
-        {
+            if (_initialized)
+                return;
+            _initialized = true;
+            libVlc = new LibVLC(enableDebugLogs: false);
             player = new MediaPlayer(libVlc);
             player.EndReached += (s, e) =>
             {

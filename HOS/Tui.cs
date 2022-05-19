@@ -68,7 +68,7 @@ namespace Client
         }));
 
         /* - AUDIO - */
-        private readonly NaiveYoutubeAudioPlayer audioPlayer = new NaiveYoutubeAudioPlayer();
+        public readonly NaiveYoutubeAudioPlayer audioPlayer = new NaiveYoutubeAudioPlayer();
 
         /* - "PREVIOUS" BUTTON - */
         private readonly LimitedStack<StepData> stepHistory = new LimitedStack<StepData>(16);
@@ -110,8 +110,6 @@ namespace Client
 
         public void Run()
         {
-            Application.Init();
-
             audioPlayer.QueueChanged += (_, q) =>
             {
                 var stringizedQueue = q.Select(t => t.ToString())
