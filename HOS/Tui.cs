@@ -66,7 +66,7 @@ namespace Client
             table.Rows.Add(1, "Programs");
             return table;
         }));
-        
+
         /* - AUDIO - */
         public readonly NaiveYoutubeAudioPlayer audioPlayer = new NaiveYoutubeAudioPlayer();
 

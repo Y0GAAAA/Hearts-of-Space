@@ -27,7 +27,7 @@ namespace Client.Audio
 
         public event EventHandler<Track[]> QueueChanged = (_, _) => { };
 
-        public NaiveYoutubeAudioPlayer() {}
+        public NaiveYoutubeAudioPlayer() { }
 
         public void Initialize()
         {

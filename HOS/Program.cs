@@ -1,5 +1,5 @@
-﻿using System;
-using Kurukuru;
+﻿using Kurukuru;
+using System;
 
 namespace Client
 {
@@ -11,7 +11,7 @@ namespace Client
             var tui = new Tui();
             Spinner.Start("Loading LibVLC...", () => LibVLCSharp.Shared.Core.Initialize());
             Spinner.Start("Loading console driver...", () => Terminal.Gui.Application.Init());
-            Spinner.Start("Initializing media player...", () => tui.audioPlayer.Initialize());  
+            Spinner.Start("Initializing media player...", () => tui.audioPlayer.Initialize());
             tui.Run();
         }
     }
